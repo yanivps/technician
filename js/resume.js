@@ -25,4 +25,10 @@
     target: '#sideNav'
   });
 
+  $("a.fancybox").fancybox({
+    smallBtn: true,
+    toolbar: false,
+    clickContent: "close"
+  });
+
 })(jQuery); // End of use strict
