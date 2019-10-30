@@ -1,1 +1,4 @@
 node_modules
+dist
+deploy_production.sh
+

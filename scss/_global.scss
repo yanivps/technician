@@ -1,14 +1,16 @@
 // Global styling for this template
 
+@include font-face(varela_roundregular, "../fonts/varelaround-regular-webfont");
+
 body {
   @include body-font;
   padding-top: 54px;
-  color: $gray-600;
+  color: $gray-700;
 }
 @media (min-width: 992px) {
   body {
     padding-top: 0;
-    padding-left: $sidebar-base-width;
+    padding-right: $sidebar-base-width;
   }
 }
 
@@ -59,4 +61,16 @@ h2 {
       color: $primary;
     }
   }
+}
+
+.ltr {
+  direction: ltr;
+}
+
+.main-color {
+  color: $gray-600;
+}
+
+a.no-decoration, a.no-decoration:hover, a.no-decoration:focus {
+  color: $gray-600;
 }
