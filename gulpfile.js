@@ -18,71 +18,72 @@ var banner = ['/*!\n',
 
 // Copy third party libraries from /node_modules into /vendor
 gulp.task('vendor', function() {
+  return new Promise(function(resolve, reject) {
+    // Bootstrap
+    gulp.src([
+        './vendor/bootstrap-rtl/**/*',
+      ])
+      .pipe(gulp.dest('./dist/vendor/bootstrap-rtl'))
 
-  // Bootstrap
-  gulp.src([
-      './vendor/bootstrap-rtl/**/*',
-    ])
-    .pipe(gulp.dest('./dist/vendor/bootstrap-rtl'))
+    // Fancybox
+    gulp.src([
+        './vendor/fancybox/**/*',
+      ])
+      .pipe(gulp.dest('./dist/vendor/fancybox'))
 
-  // Fancybox
-  gulp.src([
-      './vendor/fancybox/**/*',
-    ])
-    .pipe(gulp.dest('./dist/vendor/fancybox'))
+    // iticons
+    gulp.src([
+        './vendor/iticons/**/*',
+      ])
+      .pipe(gulp.dest('./dist/vendor/iticons'))
 
-  // iticons
-  gulp.src([
-      './vendor/iticons/**/*',
-    ])
-    .pipe(gulp.dest('./dist/vendor/iticons'))
+    // Devicons
+    gulp.src([
+        './node_modules/devicons/**/*',
+        '!./node_modules/devicons/*.json',
+        '!./node_modules/devicons/*.md',
+        '!./node_modules/devicons/!PNG',
+        '!./node_modules/devicons/!PNG/**/*',
+        '!./node_modules/devicons/!SVG',
+        '!./node_modules/devicons/!SVG/**/*'
+      ])
+      .pipe(gulp.dest('./dist/vendor/devicons'))
 
-  // Devicons
-  gulp.src([
-      './node_modules/devicons/**/*',
-      '!./node_modules/devicons/*.json',
-      '!./node_modules/devicons/*.md',
-      '!./node_modules/devicons/!PNG',
-      '!./node_modules/devicons/!PNG/**/*',
-      '!./node_modules/devicons/!SVG',
-      '!./node_modules/devicons/!SVG/**/*'
-    ])
-    .pipe(gulp.dest('./dist/vendor/devicons'))
+    // Font Awesome
+    gulp.src([
+        './node_modules/font-awesome/**/*',
+        '!./node_modules/font-awesome/{less,less/*}',
+        '!./node_modules/font-awesome/{scss,scss/*}',
+        '!./node_modules/font-awesome/.*',
+        '!./node_modules/font-awesome/*.{txt,json,md}'
+      ])
+      .pipe(gulp.dest('./dist/vendor/font-awesome'))
 
-  // Font Awesome
-  gulp.src([
-      './node_modules/font-awesome/**/*',
-      '!./node_modules/font-awesome/{less,less/*}',
-      '!./node_modules/font-awesome/{scss,scss/*}',
-      '!./node_modules/font-awesome/.*',
-      '!./node_modules/font-awesome/*.{txt,json,md}'
-    ])
-    .pipe(gulp.dest('./dist/vendor/font-awesome'))
+    // jQuery
+    gulp.src([
+        './node_modules/jquery/dist/*',
+        '!./node_modules/jquery/dist/core.js'
+      ])
+      .pipe(gulp.dest('./dist/vendor/jquery'))
 
-  // jQuery
-  gulp.src([
-      './node_modules/jquery/dist/*',
-      '!./node_modules/jquery/dist/core.js'
-    ])
-    .pipe(gulp.dest('./dist/vendor/jquery'))
+    // jQuery Easing
+    gulp.src([
+        './node_modules/jquery.easing/*.js'
+      ])
+      .pipe(gulp.dest('./dist/vendor/jquery-easing'))
 
-  // jQuery Easing
-  gulp.src([
-      './node_modules/jquery.easing/*.js'
-    ])
-    .pipe(gulp.dest('./dist/vendor/jquery-easing'))
+    // Simple Line Icons
+    gulp.src([
+        './node_modules/simple-line-icons/fonts/**',
+      ])
+      .pipe(gulp.dest('./dist/vendor/simple-line-icons/fonts'))
 
-  // Simple Line Icons
-  gulp.src([
-      './node_modules/simple-line-icons/fonts/**',
-    ])
-    .pipe(gulp.dest('./dist/vendor/simple-line-icons/fonts'))
-
-  gulp.src([
-      './node_modules/simple-line-icons/css/**',
-    ])
-    .pipe(gulp.dest('./dist/vendor/simple-line-icons/css'))
-
+    gulp.src([
+        './node_modules/simple-line-icons/css/**',
+      ])
+      .pipe(gulp.dest('./dist/vendor/simple-line-icons/css'))
+    resolve();
+  });
 });
 
 // Compile SCSS
@@ -95,7 +96,7 @@ gulp.task('css:compile', function() {
 });
 
 // Minify CSS
-gulp.task('css:minify', ['css:compile'], function() {
+gulp.task('css:minify', gulp.series('css:compile', function() {
   return gulp.src([
       './css/*.css',
       '!./css/*.min.css'
@@ -106,10 +107,10 @@ gulp.task('css:minify', ['css:compile'], function() {
     }))
     .pipe(gulp.dest('./dist/css'))
     .pipe(browserSync.stream());
-});
+}));
 
 // CSS
-gulp.task('css', ['css:compile', 'css:minify']);
+gulp.task('css', gulp.series('css:compile', 'css:minify'));
 
 // Minify JavaScript
 gulp.task('js:minify', function() {
@@ -126,7 +127,7 @@ gulp.task('js:minify', function() {
 });
 
 // JS
-gulp.task('js', ['js:minify']);
+gulp.task('js', gulp.series('js:minify'));
 
 gulp.task('fonts', function() {
   return gulp.src('fonts/**/*')
@@ -134,8 +135,11 @@ gulp.task('fonts', function() {
 });
 
 gulp.task('images', function() {
-  return gulp.src('img/**/*')
+  gulp.src('img/**/*')
   .pipe(gulp.dest('dist/img'))
+
+  return gulp.src('favicon.ico')
+  .pipe(gulp.dest('dist'))
 });
 
 gulp.task('html', function() {
@@ -144,7 +148,7 @@ gulp.task('html', function() {
 });
 
 // Default task
-gulp.task('default', ['css', 'js', 'vendor', 'fonts', 'images', 'html']);
+gulp.task('default', gulp.parallel('css', 'js', 'vendor', 'fonts', 'images', 'html'));
 
 // Configure the browserSync task
 gulp.task('browserSync', function() {
@@ -156,7 +160,7 @@ gulp.task('browserSync', function() {
 });
 
 // Dev task
-gulp.task('dev', ['css', 'js', 'browserSync'], function() {
+gulp.task('dev', gulp.parallel('css', 'js', 'browserSync'), function() {
   gulp.watch('./scss/*.scss', ['css']);
   gulp.watch('./js/*.js', ['js']);
   gulp.watch('./*.html', browserSync.reload);
