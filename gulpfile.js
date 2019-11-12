@@ -147,6 +147,7 @@ gulp.task('images', function() {
 
   return gulp.src('favicon.ico')
   .pipe(gulp.dest('dist'))
+  .pipe(browserSync.stream())
 });
 
 gulp.task('html', function() {
@@ -161,14 +162,23 @@ gulp.task('default', gulp.parallel('css', 'js', 'vendor', 'fonts', 'images', 'ht
 gulp.task('browserSync', function() {
   browserSync.init({
     server: {
-      baseDir: "./"
+      baseDir: "./dist",
     }
   });
 });
 
+// BrowserSync Reload
+function browserSyncReload(done) {
+  browserSync.reload();
+  done();
+}
+
+function watchFiles() {
+  gulp.watch('./scss/*.scss', gulp.series('css'));
+  gulp.watch('./js/*.js', gulp.series('js'));
+  gulp.watch('./img/**/*', gulp.series('images'));
+  gulp.watch('./*.html', gulp.series('html', browserSyncReload));
+}
+
 // Dev task
-gulp.task('dev', gulp.parallel('css', 'js', 'browserSync'), function() {
-  gulp.watch('./scss/*.scss', ['css']);
-  gulp.watch('./js/*.js', ['js']);
-  gulp.watch('./*.html', browserSync.reload);
-});
+gulp.task('dev', gulp.parallel('default', 'browserSync', watchFiles));
