@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var del = require('del');
 var sass = require('gulp-sass');
 var header = require('gulp-header');
 var cleanCSS = require('gulp-clean-css');
@@ -86,18 +87,24 @@ gulp.task('vendor', function() {
   });
 });
 
+// Delete compiled css
+gulp.task('css:deleteCompiled', function () {
+  return del(['./scss/*.css']);
+});
+
 // Compile SCSS
 gulp.task('css:compile', function() {
   return gulp.src('./scss/**/*.scss')
     .pipe(sass.sync({
       outputStyle: 'expanded'
     }).on('error', sass.logError))
-    .pipe(gulp.dest('./css'))
+    .pipe(gulp.dest('./scss'))
 });
 
 // Minify CSS
 gulp.task('css:minify', gulp.series('css:compile', function() {
   return gulp.src([
+      './scss/*.css',
       './css/*.css',
       '!./css/*.min.css'
     ])
@@ -110,7 +117,7 @@ gulp.task('css:minify', gulp.series('css:compile', function() {
 }));
 
 // CSS
-gulp.task('css', gulp.series('css:compile', 'css:minify'));
+gulp.task('css', gulp.series('css:compile', 'css:minify', 'css:deleteCompiled'));
 
 // Minify JavaScript
 gulp.task('js:minify', function() {
